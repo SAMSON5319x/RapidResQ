@@ -1,0 +1,242 @@
+ScreenManager:
+    LoginScreen:
+    RegisterScreen:
+    ForgotPasswordScreen:
+    ResetPasswordScreen:
+    HomeScreen:
+
+<LoginScreen>:
+    name: "login"
+    BoxLayout:
+        orientation: "vertical"
+        padding: 20
+        spacing: 10
+
+        Label:
+            text: "Login to Your Account"
+            font_size: 24
+            bold: True
+            size_hint_y: None
+            height: 50
+
+        TextInput:
+            id: email
+            hint_text: "Enter Email"
+            size_hint_y: None
+            height: 50
+            multiline: False
+
+        TextInput:
+            id: password
+            hint_text: "Enter Password"
+            password: True
+            size_hint_y: None
+            height: 50
+            multiline: False
+
+        Button:
+            text: "Login"
+            size_hint_y: None
+            height: 50
+            background_color: 0.2, 0.6, 1, 1
+            on_press: app.login(email.text, password.text)
+
+        Button:
+            text: "Forgot Password?"
+            size_hint_y: None
+            height: 50
+            background_normal: ''
+            background_color: 1, 1, 1, 0
+            color: 0.2, 0.6, 1, 1
+            on_press: root.manager.current = "forgot_password"
+
+        Button:
+            text: "Create Account"
+            size_hint_y: None
+            height: 50
+            background_normal: ''
+            background_color: 1, 1, 1, 0
+            color: 0.2, 0.6, 1, 1
+            on_press: root.manager.current = "register"
+
+<ForgotPasswordScreen>:
+    name: "forgot_password"
+    BoxLayout:
+        orientation: "vertical"
+        padding: 20
+        spacing: 10
+
+        Button:
+            text: "Back"
+            size_hint: None, None
+            size: 80, 40
+            pos_hint: {'left': 1}
+            on_press: root.manager.current = "login"
+
+        Label:
+            text: "Forgot Password"
+            font_size: 24
+            bold: True
+            size_hint_y: None
+            height: 50
+
+        TextInput:
+            id: reset_email
+            hint_text: "Enter your email"
+            size_hint_y: None
+            height: 50
+            multiline: False
+
+        Button:
+            text: "Send OTP"
+            size_hint_y: None
+            height: 50
+            background_color: 0.2, 0.6, 1, 1
+            on_press: app.send_reset_email(reset_email.text)
+
+        TextInput:
+            id: otp
+            hint_text: "Enter OTP"
+            size_hint_y: None
+            height: 50
+            multiline: False
+
+        Button:
+            text: "Verify OTP"
+            size_hint_y: None
+            height: 50
+            background_color: 0.2, 0.6, 1, 1
+            on_press: 
+                app.verify_otp(reset_email.text, otp.text)
+                root.manager.current = "reset_password" if app.otp_verified else "forgot_password"
+
+<ResetPasswordScreen>:
+    name: "reset_password"
+    BoxLayout:
+        orientation: "vertical"
+        padding: 20
+        spacing: 10
+
+        Button:
+            text: "Back"
+            size_hint: None, None
+            size: 80, 40
+            pos_hint: {'left': 1}
+            on_press: root.manager.current = "forgot_password"
+
+        Label:
+            text: "Reset Password"
+            font_size: 24
+            bold: True
+            size_hint_y: None
+            height: 50
+
+        TextInput:
+            id: new_password
+            hint_text: "Enter New Password"
+            password: True
+            size_hint_y: None
+            height: 50
+            multiline: False
+
+        TextInput:
+            id: confirm_password
+            hint_text: "Confirm New Password"
+            password: True
+            size_hint_y: None
+            height: 50
+            multiline: False
+
+        Button:
+            text: "Reset Password"
+            size_hint_y: None
+            height: 50
+            background_color: 0.2, 0.6, 1, 1
+            on_press: app.reset_password(new_password.text, confirm_password.text)
+
+<RegisterScreen>:
+    name: "register"
+    BoxLayout:
+        orientation: "vertical"
+        padding: 20
+        spacing: 10
+
+        Button:
+            text: "Back"
+            size_hint: None, None
+            size: 80, 40
+            pos_hint: {'left': 1}
+            on_press: root.manager.current = "login"
+
+        Label:
+            text: "Create New Account"
+            font_size: 24
+            bold: True
+            size_hint_y: None
+            height: 50
+
+        TextInput:
+            id: name
+            hint_text: "Full Name"
+            size_hint_y: None
+            height: 50
+            multiline: False
+
+        TextInput:
+            id: reg_email
+            hint_text: "Enter Email"
+            size_hint_y: None
+            height: 50
+            multiline: False
+
+        TextInput:
+            id: reg_password
+            hint_text: "Enter Password"
+            password: True
+            size_hint_y: None
+            height: 50
+            multiline: False
+
+        TextInput:
+            id: confirm_password
+            hint_text: "Confirm Password"
+            password: True
+            size_hint_y: None
+            height: 50
+            multiline: False
+
+        Button:
+            text: "Register"
+            size_hint_y: None
+            height: 50
+            background_color: 0.2, 0.6, 1, 1
+            on_press: app.register(name.text, reg_email.text, reg_password.text, confirm_password.text)
+
+        Button:
+            text: "Already have an account? Login"
+            size_hint_y: None
+            height: 50
+            background_normal: ''
+            background_color: 1, 1, 1, 0
+            color: 0.2, 0.6, 1, 1
+            on_press: root.manager.current = "login"
+
+<HomeScreen>:
+    name: "home"
+    BoxLayout:
+        orientation: "vertical"
+        padding: 20
+        spacing: 10
+        
+        Label:
+            text: "Welcome to Home Screen"
+            font_size: 24
+            bold: True
+            halign: "center"
+        
+        Button:
+            text: "Logout"
+            size_hint_y: None
+            height: 50
+            background_color: 0.2, 0.6, 1, 1
+            on_press: root.manager.current = "login"
