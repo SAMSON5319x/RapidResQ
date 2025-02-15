@@ -15,10 +15,13 @@ from requests.exceptions import HTTPError
 from dotenv import load_dotenv
 import secrets
 import time
+import firebase_admin
+from firebase_admin import auth, credentials, firestore
+from kivy.uix.screenmanager import ScreenManager
+from student_dashboard import StudentDashboard
 
 # Load environment variables
 load_dotenv()
-
 # Firebase Configuration
 firebase_config = {
     "apiKey": "AIzaSyCuBHC1DhQwqvJ51EfEvq6Caoph2wAb-Eg",
@@ -32,9 +35,10 @@ firebase_config = {
 }
 
 # Initialize Firebase
-firebase = pyrebase.initialize_app(firebase_config)
-auth = firebase.auth()
-db = firebase.database()
+cred = credentials.Certificate("serviceAccountKey.json")
+if not firebase_admin._apps:  # ✅ Prevent multiple initializations
+    firebase_admin.initialize_app(cred)
+db = firestore.client()  # ✅ This is for Firestore!
 
 class OTPManager:
     def __init__(self):
@@ -75,6 +79,9 @@ class OTPManager:
 class LoginScreen(Screen):
     pass
 
+class DashboardScreen(Screen):
+    pass
+
 class RegisterScreen(Screen):
     pass
 
@@ -86,6 +93,19 @@ class ResetPasswordScreen(Screen):
 
 class HomeScreen(Screen):
     pass
+class WindowManager(ScreenManager):
+    pass
+
+class MainApp(MDApp):
+    def build(self):
+        self.current_user_id = None  # ✅ Store logged-in user ID
+        sm = WindowManager()
+        sm.add_widget(LoginScreen(name="login"))
+        sm.add_widget(StudentDashboard(name="student_dashboard"))  
+        sm.add_widget(StaffDashboard(name="staff_dashboard"))  
+        sm.add_widget(AdminDashboard(name="admin_dashboard"))  
+        return sm
+
 
 class LoginApp(MDApp):
     def __init__(self, **kwargs):
@@ -111,7 +131,7 @@ class LoginApp(MDApp):
 
     def is_valid_email(self, email):
         """Validate email format using regex"""
-        pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        pattern = r"^[a-zA-Z0-9._%+-]+@citchennai\.net$"  # ✅ Accept only 'citchennai.net' domain
         return bool(re.match(pattern, email))
 
     def validate_password(self, password):
@@ -121,55 +141,115 @@ class LoginApp(MDApp):
         return True, "Password is valid"
 
     def login(self, email, password):
-        """Handle user login"""
         try:
             if not email.strip() or not password.strip():
                 raise ValueError("Please fill in all fields")
 
             if not self.is_valid_email(email):
-                raise ValueError("Invalid email format")
+                raise ValueError(f"Invalid email format: {email}")
 
-            user = auth.sign_in_with_email_and_password(email, password)
-            self.root.current = "home"
-            self.show_dialog("Success", "Login successful!")
+            # ✅ Firebase Authentication
+            user = auth.get_user_by_email(email)
+            user_id = user.uid  
 
-        except HTTPError as e:
-            error_message = "Login failed. Please check your credentials."
-            if "INVALID_PASSWORD" in str(e):
-                error_message = "Incorrect password"
-            elif "EMAIL_NOT_FOUND" in str(e):
-                error_message = "Email not found"
-            self.show_dialog("Error", error_message)
+            # ✅ Fetch user role
+            doc_ref = db.collection("users").document(user_id)
+            doc = doc_ref.get()
+
+            if not doc.exists:
+                raise ValueError("User data not found in Firestore!")
+
+            user_data = doc.to_dict()
+            role = user_data.get("role", "unknown")
+
+            # ✅ Store user ID
+            self.current_user_id = user_id  
+
+            # ✅ Ensure screen exists before switching
+            if role == "student":
+                if not self.root.has_screen("student_dashboard"):
+                    self.root.add_widget(StudentDashboard(name="student_dashboard"))
+                self.root.get_screen("student_dashboard").load_student_data(user_id)
+                self.root.current = "student_dashboard"
+
+            elif role == "staff":
+                if not self.root.has_screen("staff_dashboard"):
+                    self.root.add_widget(StaffDashboard(name="staff_dashboard"))
+                self.root.get_screen("staff_dashboard").load_staff_data(user_id)
+                self.root.current = "staff_dashboard"
+
+            elif role == "admin":
+                if not self.root.has_screen("admin_dashboard"):
+                    self.root.add_widget(AdminDashboard(name="admin_dashboard"))
+                self.root.get_screen("admin_dashboard").load_admin_data(user_id)
+                self.root.current = "admin_dashboard"
+
+            else:
+                raise ValueError("Unauthorized Access!")
+
+            self.show_dialog("Success", f"Login successful! Welcome, {role.capitalize()}")
+
+        except ValueError as ve:
+            self.show_dialog("Error", str(ve))
+
         except Exception as e:
-            self.show_dialog("Error", str(e))
+            self.show_dialog("Error", f"Unexpected error: {str(e)}")
 
-    def register(self, name, email, password, confirm_password):
-        """Handle user registration"""
+# ✅ Make get_role_from_email a static method
+@staticmethod
+def get_role_from_email(email):
+    """Automatically determine user role from email format"""
+    if re.match(r".+\.cs\d{4}@citchennai\.net", email):  # Student email format
+        return "student"
+    elif re.match(r"^[^@]+@citchennai\.net$", email):  # Staff email format
+        return "staff"
+    else:
+        return "unknown"  # Admins are manually assigned
+
+
+    def register(self, name, reg_no, dept, phone, father_phone, mother_phone, email, password, confirm_password):
+        """Handle student registration with additional details"""
         try:
-            if not all([name.strip(), email.strip(), password.strip(), confirm_password.strip()]):
+            # 🔹 Ensure all fields are filled
+            if not all([name.strip(), reg_no.strip(), dept.strip(), phone.strip(), father_phone.strip(), mother_phone.strip(), email.strip(), password.strip(), confirm_password.strip()]):
                 raise ValueError("Please fill in all fields")
 
+            # 🔹 Validate Email Format
             if not self.is_valid_email(email):
                 raise ValueError("Invalid email format")
 
+            # 🔹 Check Password Match
             if password != confirm_password:
                 raise ValueError("Passwords do not match")
 
+            # 🔹 Validate Password Strength
             is_valid, msg = self.validate_password(password)
             if not is_valid:
                 raise ValueError(msg)
 
-            user = auth.create_user_with_email_and_password(email, password)
-            user_id = user['localId']
-            
-            # Store user data in database
-            user_data = {
+            # 🔹 Auto-Detect Role from Email
+            role = get_role_from_email(email)  # ✅ Ensure this function exists
+            if role == "unknown":
+                raise ValueError("Only college email IDs are allowed for registration.")
+
+            # 🔹 Create Firebase Authentication User
+            user = auth.create_user(email=email, password=password)
+            user_id = user.uid  # ✅ Corrected UID retrieval
+
+            # 🔹 Store Student Data in Firestore
+            student_data = {
                 "name": name,
+                "reg_no": reg_no,
+                "dept": dept,
+                "phone": phone,
+                "father_phone": father_phone,
+                "mother_phone": mother_phone,
                 "email": email,
-                "created_at": {".sv": "timestamp"}
+                "role": role,
+                "created_at": firestore.SERVER_TIMESTAMP  # ✅ Uses Firestore's timestamp
             }
-            db.child("users").child(user_id).set(user_data)
-            
+            db.collection("users").document(user_id).set(student_data)
+
             self.show_dialog("Success", "Account created successfully! Please login.")
             self.root.current = "login"
 
@@ -178,8 +258,13 @@ class LoginApp(MDApp):
             if "EMAIL_EXISTS" in str(e):
                 error_message = "This email is already registered"
             self.show_dialog("Error", error_message)
+
+        except firebase_admin.exceptions.FirebaseError as e:
+            self.show_dialog("Error", f"Firebase Error: {str(e)}")
+
         except Exception as e:
             self.show_dialog("Error", str(e))
+
 
     def send_reset_email(self, email):
         """Send password reset OTP"""
@@ -197,8 +282,8 @@ class LoginApp(MDApp):
             otp = self.otp_manager.generate_otp(email)
 
             # Email configuration
-            sender_email = "saimukeshr.cs2023@citchennai.net"
-            sender_password = "saimukes"
+            sender_email = os.getenv("SMTP_EMAIL")
+            sender_password = os.getenv("SMTP_PASSWORD")
 
             msg = MIMEMultipart()
             msg['From'] = sender_email
@@ -220,7 +305,7 @@ class LoginApp(MDApp):
                 server.send_message(msg)
 
             self.show_dialog("Success", "OTP sent! Please check your email.")
-
+        
         except Exception as e:
             self.show_dialog("Error", f"Failed to send OTP: {str(e)}")
 
@@ -249,16 +334,31 @@ class LoginApp(MDApp):
             if not is_valid:
                 raise ValueError(msg)
 
-            if self.current_email:
-                auth.send_password_reset_email(self.current_email)
-                self.show_dialog("Success", "Password reset link sent to your email")
-                self.current_email = None
-                self.root.current = "login"
-            else:
+            if not self.current_email:
                 raise ValueError("Email not found. Please try again")
+
+            # Get user by email
+            users = auth.get_user_by_email(self.current_email)
+            if not users:
+                raise ValueError("User not found")
+
+            # Update password in Firebase
+            user = auth.sign_in_with_email_and_password(self.current_email, new_password)
+            auth.update_password(user['idToken'], new_password)
+
+            self.show_dialog("Success", "Password reset successfully!")
+            self.current_email = None  # Clear the stored email
+            self.root.current = "login"
+
+        except HTTPError as e:
+            error_message = "Password reset failed"
+            if "INVALID_PASSWORD" in str(e):
+                error_message = "Invalid password format"
+            self.show_dialog("Error", error_message)
 
         except Exception as e:
             self.show_dialog("Error", str(e))
+
 
 if __name__ == "__main__":
     LoginApp().run()
