@@ -1,0 +1,15 @@
+<ProfileScreen>:
+    name: "profile"
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        
+        Label:
+            text: "Welcome to Your Profile"
+            font_size: 24
+            halign: "center"
+
+        Button:
+            text: "Go to Home"
+            on_press: app.root.current = "home"

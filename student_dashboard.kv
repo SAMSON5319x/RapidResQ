@@ -1,0 +1,54 @@
+<StudentDashboard>:
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1  # ✅ Background is now white
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: 20
+        spacing: 10
+        size_hint_x: 1  # ✅ Full width
+
+        Label:
+            id: welcome_label
+            text: ""  # ✅ Start with empty text
+            font_size: 28
+            bold: True
+            color: 0, 0, 0, 1  # ✅ Set text color to black
+            halign: "left"
+            text_size: self.size
+
+        Label:
+            id: student_name
+            text: ""
+            font_size: 24
+            color: 0, 0, 0, 1  # ✅ Set text color to black
+            halign: "left"
+            text_size: self.size
+
+        Label:
+            id: reg_no
+            text: ""
+            font_size: 24
+            color: 0, 0, 0, 1
+            halign: "left"
+            text_size: self.size
+
+        Label:
+            id: dept
+            text: ""
+            font_size: 24
+            color: 0, 0, 0, 1
+            halign: "left"
+            text_size: self.size
+
+        Label:
+            id: phone
+            text: ""
+            font_size: 24
+            color: 0, 0, 0, 1
+            halign: "left"
+            text_size: self.size

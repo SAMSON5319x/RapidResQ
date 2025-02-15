@@ -1,0 +1,54 @@
+<StudentDashboard>:
+    name: "student_dashboard"
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: 20
+        spacing: 10
+
+        MDLabel:
+            text: "Student Dashboard"
+            font_style: "H5"
+            halign: "center"
+            size_hint_y: None
+            height: 50
+
+        MDCard:
+            padding: 15
+            size_hint_y: None
+            height: 200
+            elevation: 5
+            radius: [15, 15, 15, 15]
+
+            BoxLayout:
+                orientation: "vertical"
+                spacing: 10
+
+                MDLabel:
+                    id: student_name
+                    text: "Name: Loading..."
+                    font_style: "Body1"
+
+                MDLabel:
+                    id: student_reg_no
+                    text: "Reg No: Loading..."
+                    font_style: "Body1"
+
+                MDLabel:
+                    id: student_dept
+                    text: "Department: Loading..."
+                    font_style: "Body1"
+
+        MDFillRoundFlatButton:
+            text: "Send SOS Alert"
+            md_bg_color: 1, 0, 0, 1
+            on_press: app.send_sos_alert()
+
+        MDFillRoundFlatButton:
+            text: "View Medical Records"
+            on_press: app.view_medical_records()
+
+        MDFillRoundFlatButton:
+            text: "Logout"
+            md_bg_color: 0.2, 0.6, 1, 1
+            on_press: app.logout()

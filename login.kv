@@ -4,6 +4,7 @@ ScreenManager:
     ForgotPasswordScreen:
     ResetPasswordScreen:
     HomeScreen:
+    DashboardScreen: 
 
 <LoginScreen>:
     name: "login"
@@ -67,11 +68,24 @@ ScreenManager:
         spacing: 10
 
         Button:
-            text: "Back"
             size_hint: None, None
             size: 80, 40
             pos_hint: {'left': 1}
             on_press: root.manager.current = "login"
+    
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1, 1
+                spacing: 5
+                Image:
+                    source: "back_arrow.png"  # Use a local image file
+                    size_hint: None, None
+                    size: 20, 20
+                Label:
+                    text: "Back"
+                    size_hint_x: None
+                    width: 50
+
 
         Label:
             text: "Forgot Password"
@@ -85,7 +99,19 @@ ScreenManager:
             hint_text: "Enter your email"
             size_hint_y: None
             height: 50
+            halign: "center"
+            valign: "middle"
             multiline: False
+
+        TextInput:
+            id: otp
+            hint_text: "Enter OTP"
+            size_hint_y: None
+            height: 50
+            halign: "center"
+            valign: "middle"
+            multiline: False
+
 
         Button:
             text: "Send OTP"
@@ -93,13 +119,6 @@ ScreenManager:
             height: 50
             background_color: 0.2, 0.6, 1, 1
             on_press: app.send_reset_email(reset_email.text)
-
-        TextInput:
-            id: otp
-            hint_text: "Enter OTP"
-            size_hint_y: None
-            height: 50
-            multiline: False
 
         Button:
             text: "Verify OTP"
@@ -161,12 +180,24 @@ ScreenManager:
         padding: 20
         spacing: 10
 
-        Button:
-            text: "Back"
-            size_hint: None, None
-            size: 80, 40
-            pos_hint: {'left': 1}
-            on_press: root.manager.current = "login"
+        # 🔹 Back Button with Image (Fixed Indentation)
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: 40
+            Button:
+                size_hint: None, None
+                size: 80, 40
+                pos_hint: {'left': 1}
+                on_press: root.manager.current = "login"
+                Image:
+                    source: "back_arrow.png"
+                    size_hint: None, None
+                    size: 20, 20
+                Label:
+                    text: "Back"
+                    size_hint_x: None
+                    width: 50
 
         Label:
             text: "Create New Account"
@@ -174,14 +205,56 @@ ScreenManager:
             bold: True
             size_hint_y: None
             height: 50
-
+        
+        # 🔹 Name Field
         TextInput:
             id: name
-            hint_text: "Full Name"
+            hint_text: "Name"
             size_hint_y: None
             height: 50
             multiline: False
 
+        # 🔹 Registration Number Field
+        TextInput:
+            id: reg_no
+            hint_text: "Registration Number"
+            size_hint_y: None
+            height: 50
+            multiline: False
+
+        # 🔹 Department Field
+        TextInput:
+            id: dept
+            hint_text: "Department"
+            size_hint_y: None
+            height: 50
+            multiline: False
+
+        # 🔹 Student Phone Number
+        TextInput:
+            id: phone
+            hint_text: "Student Phone Number"
+            size_hint_y: None
+            height: 50
+            multiline: False
+
+        # 🔹 Father’s Phone Number
+        TextInput:
+            id: father_phone
+            hint_text: "Father's Phone Number"
+            size_hint_y: None
+            height: 50
+            multiline: False
+
+        # 🔹 Mother's Phone Number
+        TextInput:
+            id: mother_phone
+            hint_text: "Mother's Phone Number"
+            size_hint_y: None
+            height: 50
+            multiline: False
+
+        # 🔹 Email Input
         TextInput:
             id: reg_email
             hint_text: "Enter Email"
@@ -189,6 +262,7 @@ ScreenManager:
             height: 50
             multiline: False
 
+        # 🔹 Password Input
         TextInput:
             id: reg_password
             hint_text: "Enter Password"
@@ -197,6 +271,7 @@ ScreenManager:
             height: 50
             multiline: False
 
+        # 🔹 Confirm Password Input
         TextInput:
             id: confirm_password
             hint_text: "Confirm Password"
@@ -205,13 +280,16 @@ ScreenManager:
             height: 50
             multiline: False
 
+        # 🔹 Register Button (Fixed Indentation)
         Button:
             text: "Register"
             size_hint_y: None
             height: 50
             background_color: 0.2, 0.6, 1, 1
-            on_press: app.register(name.text, reg_email.text, reg_password.text, confirm_password.text)
+            on_press: 
+                app.register(name.text, reg_no.text, dept.text, phone.text, father_phone.text, mother_phone.text, reg_email.text, reg_password.text, confirm_password.text)
 
+        # 🔹 Already Have an Account Button (Fixed Position)
         Button:
             text: "Already have an account? Login"
             size_hint_y: None
@@ -220,6 +298,8 @@ ScreenManager:
             background_color: 1, 1, 1, 0
             color: 0.2, 0.6, 1, 1
             on_press: root.manager.current = "login"
+
+
 
 <HomeScreen>:
     name: "home"
@@ -240,3 +320,56 @@ ScreenManager:
             height: 50
             background_color: 0.2, 0.6, 1, 1
             on_press: root.manager.current = "login"
+
+
+<StudentDashboard>:
+    name: "student_dashboard"
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: 20
+        spacing: 10
+
+        Label:
+            id: welcome_label
+            text: "Loading..."
+            font_size: 24
+            bold: True
+            size_hint_y: None
+            height: 50
+
+        Label:
+            id: student_name
+            text: "Name: Loading..."
+            size_hint_y: None
+            height: 40
+
+        Label:
+            id: reg_no
+            text: "Registration Number: Loading..."
+            size_hint_y: None
+            height: 40
+
+        Label:
+            id: dept
+            text: "Department: Loading..."
+            size_hint_y: None
+            height: 40
+
+        Label:
+            id: phone
+            text: "Phone: Loading..."
+            size_hint_y: None
+            height: 40
+
+        Button:
+            text: "Logout"
+            size_hint_y: None
+            height: 50
+            background_color: 0.2, 0.6, 1, 1
+            on_press: app.root.current = "login"
+
+
+
+
+
