@@ -102,8 +102,8 @@ class MainApp(MDApp):
         sm = WindowManager()
         sm.add_widget(LoginScreen(name="login"))
         sm.add_widget(StudentDashboard(name="student_dashboard"))  
-        sm.add_widget(StaffDashboard(name="staff_dashboard"))  
-        sm.add_widget(AdminDashboard(name="admin_dashboard"))  
+        # sm.add_widget(StaffDashboard(name="staff_dashboard"))  
+        # sm.add_widget(AdminDashboard(name="admin_dashboard"))  
         return sm
 
 
@@ -172,17 +172,17 @@ class LoginApp(MDApp):
                 self.root.get_screen("student_dashboard").load_student_data(user_id)
                 self.root.current = "student_dashboard"
 
-            elif role == "staff":
-                if not self.root.has_screen("staff_dashboard"):
-                    self.root.add_widget(StaffDashboard(name="staff_dashboard"))
-                self.root.get_screen("staff_dashboard").load_staff_data(user_id)
-                self.root.current = "staff_dashboard"
+            # elif role == "staff":
+            #     if not self.root.has_screen("staff_dashboard"):
+            #         self.root.add_widget(StaffDashboard(name="staff_dashboard"))
+            #     self.root.get_screen("staff_dashboard").load_staff_data(user_id)
+            #     self.root.current = "staff_dashboard"
 
-            elif role == "admin":
-                if not self.root.has_screen("admin_dashboard"):
-                    self.root.add_widget(AdminDashboard(name="admin_dashboard"))
-                self.root.get_screen("admin_dashboard").load_admin_data(user_id)
-                self.root.current = "admin_dashboard"
+            # elif role == "admin":
+            #     if not self.root.has_screen("admin_dashboard"):
+            #         self.root.add_widget(AdminDashboard(name="admin_dashboard"))
+            #     self.root.get_screen("admin_dashboard").load_admin_data(user_id)
+            #     self.root.current = "admin_dashboard"
 
             else:
                 raise ValueError("Unauthorized Access!")

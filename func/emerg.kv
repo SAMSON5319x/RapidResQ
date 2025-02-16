@@ -1,0 +1,101 @@
+<EmergencySOSScreen>:
+    name: 'sos_screen'
+    
+    MDBoxLayout:
+        orientation: 'vertical'
+        spacing: '10dp'
+        padding: '10dp'
+        
+        # Medical Profile Card
+        MDCard:
+            orientation: 'vertical'
+            padding: '8dp'
+            size_hint: None, None
+            size: "320dp", "200dp"
+            pos_hint: {"center_x": .5}
+            
+            MDLabel:
+                text: "Medical Profile"
+                halign: "center"
+                size_hint_y: None
+                height: self.texture_size[1]
+                bold: True
+                
+            GridLayout:
+                cols: 2
+                spacing: '8dp'
+                padding: '8dp'
+                
+                MDLabel:
+                    text: "Blood Group:"
+                MDLabel:
+                    text: root.user_data['blood_group'] if root.user_data else "Not specified"
+                    
+                MDLabel:
+                    text: "Allergies:"
+                MDLabel:
+                    text: ", ".join(root.user_data['allergies']) if root.user_data and 'allergies' in root.user_data else "None"
+                    
+                MDLabel:
+                    text: "Medications:"
+                MDLabel:
+                    text: ", ".join(root.user_data['medications']) if root.user_data and 'medications' in root.user_data else "None"
+        
+        # SOS Button
+        MDCard:
+            orientation: 'vertical'
+            padding: '16dp'
+            size_hint: None, None
+            size: "320dp", "320dp"
+            pos_hint: {"center_x": .5}
+            md_bg_color: [0.9, 0.9, 0.9, 1]
+            
+            MDBoxLayout:
+                orientation: 'vertical'
+                spacing: '10dp'
+                
+                MDRaisedButton:
+                    text: "SOS" if not root.is_sos_active else "CANCEL SOS"
+                    size_hint: None, None
+                    size: "150dp", "150dp"
+                    pos_hint: {"center_x": .5}
+                    md_bg_color: [0.8, 0, 0, 1] if not root.is_sos_active else [0.6, 0, 0, 1]
+                    on_release: root.trigger_sos() if not root.is_sos_active else root.cancel_sos()
+                    
+                MDLabel:
+                    text: root.location_status
+                    halign: "center"
+                    size_hint_y: None
+                    height: self.texture_size[1]
+        
+        # Emergency Contacts
+        MDCard:
+            orientation: 'vertical'
+            padding: '8dp'
+            size_hint: None, None
+            size: "320dp", "200dp"
+            pos_hint: {"center_x": .5}
+            
+            MDLabel:
+                text: "Emergency Contacts"
+                halign: "center"
+                size_hint_y: None
+                height: self.texture_size[1]
+                bold: True
+                
+            ScrollView:
+                GridLayout:
+                    cols: 1
+                    spacing: '4dp'
+                    size_hint_y: None
+                    height: self.minimum_height
+                    
+                    MDLabel:
+                        text: f"Father: {root.user_data['father_phone']}" if root.user_data else "No contacts"
+                        size_hint_y: None
+                        height: self.texture_size[1]
+                        
+                    MDLabel:
+                        text: f"Mother: {root.user_data['mother_phone']}" if root.user_data else ""
+                        size_hint_y: None
+                        height: self.texture_size[1]
